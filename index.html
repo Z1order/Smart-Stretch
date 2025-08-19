@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Smart Stretch — Pre-Workout Routines</title>
+  <meta name="description" content="Build a safe, guided pre-workout stretch routine with a timer." />
+  <style>
+    :root{
+      --bg: #f7f8fa;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --accent:#2563eb;       /* blue */
+      --accent-weak:#dbeafe;  /* light blue */
+      --ok:#16a34a;
+      --warn:#b45309;
+      --radius: 18px;
+      --shadow: 0 10px 24px rgba(15,23,42,.08);
+      --shadow-soft: 0 6px 16px rgba(15,23,42,.06);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+      color:var(--text);
+      background:linear-gradient(180deg, #f7faff 0%, var(--bg) 60%);
+      line-height:1.5;
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter:saturate(180%) blur(10px);
+      background:rgba(247,250,255,.75);
+      border-bottom:1px solid #e5eaf3;
+    }
+    .wrap{max-width:1100px;margin:0 auto;padding:20px}
+    .brand{
+      display:flex; align-items:center; gap:14px;
+      font-weight:800; letter-spacing:.2px;
+    }
+    .logo{
+      width:40px;height:40px;border-radius:12px;
+      background: radial-gradient(120% 120% at 30% 20%, var(--accent) 0%, #60a5fa 40%, #93c5fd 70%, #fff 100%);
+      box-shadow:var(--shadow);
+    }
+
+    /* Layout */
+    .grid{display:grid; gap:20px}
+    @media (min-width: 960px){ .grid{grid-template-columns: 1.1fr .9fr} }
+
+    .card{
+      background:var(--card);
+      border-radius:var(--radius);
+      box-shadow:var(--shadow);
+      padding:18px;
+    }
+    h1{font-size:28px; margin:10px 0 0}
+    h2{font-size:18px; margin:0 0 8px}
+    p{margin:8px 0; color:var(--muted)}
+    label{font-weight:600; color:#0b1220}
+    select,input,button{
+      font:inherit;
+    }
+    .row{display:flex; gap:12px; flex-wrap:wrap}
+    .field{
+      flex:1 1 180px;
+      display:flex; flex-direction:column; gap:6px;
+    }
+    .control{
+      border:1px solid #d9e3f5; background:#fff;
+      border-radius:14px; padding:12px 14px;
+      outline:none;
+      box-shadow:var(--shadow-soft);
+    }
+    .control:focus{border-color:var(--accent); box-shadow:0 0 0 4px var(--accent-weak)}
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center;
+      border:0; background:var(--accent); color:#fff; font-weight:700;
+      padding:12px 16px; border-radius:14px; cursor:pointer;
+      box-shadow:var(--shadow);
+      transition:transform .04s ease, opacity .2s ease;
+    }
+    .btn:active{transform:translateY(1px)}
+    .btn.secondary{
+      background:#eef2ff; color:#1e293b; font-weight:700;
+      border:1px solid #e5e7eb;
+    }
+    .btn.ghost{
+      background:transparent; color:var(--accent); border:1px solid var(--accent);
+    }
+    .btn.block{width:100%}
+
+    /* Progress Bar */
+    .progress{
+      height:10px; background:#edf2f7; border-radius:999px; overflow:hidden;
+      box-shadow:inset 0 1px 2px rgba(15,23,42,.08);
+    }
+    .progress > span{
+      height:100%; display:block; width:0%;
+      background:linear-gradient(90deg, #60a5fa, var(--accent));
+      transition:width .3s ease;
+    }
+
+    .list{
+      display:grid; gap:12px;
+    }
+    .item{
+      border:1px solid #e7ecf7;
+      border-radius:16px; padding:14px;
+      display:grid; gap:8px;
+      background:#fff;
+    }
+    .item h3{
+      margin:0; font-size:16px;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .badge{
+      font-size:12px; font-weight:700; color:#0b3b8f;
+      background:var(--accent-weak);
+      padding:4px 8px; border-radius:999px; border:1px solid #bfdbfe;
+    }
+    .meta{color:var(--muted); font-size:13px}
+    .warn{color:var(--warn); font-weight:700}
+
+    /* Timer Pane */
+    .timer{
+      display:grid; gap:16px;
+    }
+    .timer-face{
+      display:grid; place-items:center;
+      border-radius:20px; padding:28px;
+      background:conic-gradient(from 90deg at 50% 50%, #eaf1ff 0%, #f7fbff 70%, #ffffff 100%);
+      border:1px solid #e6eefc;
+    }
+    .big{
+      font-size:48px; font-weight:800; letter-spacing:1px;
+    }
+    .sub{color:var(--muted); font-weight:600}
+
+    .toolbar{display:flex; gap:10px; flex-wrap:wrap}
+    .toolbar .btn{flex:1 1 120px}
+
+    .fine-print{font-size:12px; color:var(--muted)}
+    .spacer{height:6px}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="brand">
+        <div class="logo" aria-hidden="true"></div>
+        <div>
+          <div style="font-size:13px; color:var(--muted); font-weight:700; letter-spacing:.08em; text-transform:uppercase">Smart Stretch</div>
+          <h1>Build your pre-workout stretch</h1>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap grid" id="app">
+    <!-- Left: Builder & List -->
+    <section class="card" aria-labelledby="builderTitle">
+      <h2 id="builderTitle">1) Choose your activity & options</h2>
+      <div class="row" role="group" aria-label="Routine options">
+        <div class="field">
+          <label for="activity">Activity</label>
+          <select id="activity" class="control">
+            <option value="general">General Warm-Up</option>
+            <option value="running">Running</option>
+            <option value="lifting">Strength/Lifting</option>
+            <option value="cycling">Cycling</option>
+            <option value="soccer">Soccer / Field Sport</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="intensity">Intensity</label>
+          <select id="intensity" class="control">
+            <option value="easy">Easy day</option>
+            <option value="moderate" selected>Moderate</option>
+            <option value="hard">Hard day</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="focus">Tight area focus (optional)</label>
+          <select id="focus" class="control">
+            <option value="">No extra focus</option>
+            <option value="hips">Hips</option>
+            <option value="hamstrings">Hamstrings</option>
+            <option value="calves">Calves</option>
+            <option value="shoulders">Shoulders</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px">
+        <button id="build" class="btn">Build Routine</button>
+        <button id="clear" class="btn secondary">Clear</button>
+        <button id="print" class="btn ghost">Print</button>
+      </div>
+
+      <div class="spacer"></div>
+      <div class="progress" aria-label="Routine progress">
+        <span id="progressBar" style="width:0%"></span>
+      </div>
+
+      <div style="margin-top:14px">
+        <h2 style="margin-bottom:6px">2) Your stretches</h2>
+        <p class="fine-print">Dynamic stretches first to warm tissues, then brief static holds. Move in a pain-free range. If something hurts, skip it.</p>
+        <div id="list" class="list" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <!-- Right: Timer & Controls -->
+    <aside class="card timer" aria-labelledby="timerTitle">
+      <h2 id="timerTitle">3) Guided timer</h2>
+      <div class="timer-face">
+        <div class="big" id="clock" aria-live="assertive">00:00</div>
+        <div class="sub" id="nowLabel">No routine loaded</div>
+      </div>
+      <div class="toolbar">
+        <button class="btn" id="start">Start</button>
+        <button class="btn secondary" id="pause">Pause</button>
+        <button class="btn secondary" id="reset">Reset</button>
+      </div>
+      <div class="toolbar">
+        <button class="btn ghost" id="prev">Prev</button>
+        <button class="btn ghost" id="next">Next</button>
+        <button class="btn" id="complete">Mark Complete</button>
+      </div>
+      <p class="fine-print">
+        Safety: Keep breathing, no bouncing on static holds, and never force a joint. Warm-ups should feel smooth, not painful.
+      </p>
+    </aside>
+  </main>
+
+  <script>
+    /* -----------------------------
+       Simple pre-workout stretch app
+       ----------------------------- */
+
+    // Library of moves (simple, readable objects)
+    const MOVES = {
+      general: [
+        m("March in Place", "dynamic", 45, "Loosen up and raise heart rate."),
+        m("Arm Circles (forward/back)", "dynamic", 40, "Small to large circles."),
+        m("Hip Hinge Swings", "dynamic", 40, "Hands on hips, smooth hinge."),
+        m("World’s Greatest Stretch", "dynamic", 60, "Lunge, rotate thoracic spine."),
+        m("Leg Swings (front/back)", "dynamic", 40, "Light, controlled swings holding support."),
+        m("Leg Swings (side/side)", "dynamic", 40, "Keep torso stable."),
+        m("Ankle Rolls", "dynamic", 30, "Both directions."),
+        m("Calf Pulse Stretch", "dynamic", 30, "Mini pulses against wall."),
+        m("Hamstring Sweep", "dynamic", 30, "Straighten knee, sweep hands to foot."),
+        m("Standing Quad Hold", "static", 20, "Gentle hold each side."),
+        m("Figure-4 Glute", "static", 20, "Cross ankle over knee, sit back.")
+      ],
+      running: [
+        m("Light Jog / High March", "dynamic", 60, "Elevate temp and HR."),
+        m("Leg Swings (front/back)", "dynamic", 45, "Controlled range."),
+        m("Leg Swings (side/side)", "dynamic", 45, "Glute med activation."),
+        m("Hip Openers", "dynamic", 45, "Up, out, down; then reverse."),
+        m("A-Skips", "dynamic", 45, "Rhythm and posture."),
+        m("Butt Kicks", "dynamic", 30, "Quick but relaxed."),
+        m("Ankle Hops", "dynamic", 30, "Soft, elastic contacts."),
+        m("Calf Wall Stretch", "static", 20, "Gastrocnemius then soleus."),
+        m("Hamstring Doorway or Standing", "static", 20, "Gentle hold."),
+      ],
+      lifting: [
+        m("Cat-Cow", "dynamic", 45, "Spine segmentation."),
+        m("T-Spine Open Book", "dynamic", 45, "Rotate upper back."),
+        m("Bodyweight Squats", "dynamic", 45, "Sit tall, knees track toes."),
+        m("Hip Flexor Lunge Shift", "dynamic", 40, "Glute squeeze, gentle shift."),
+        m("Shoulder Pass-Through (towel/stick)", "dynamic", 45, "Comfortable range only."),
+        m("Scapular Pulls / Wall Slides", "dynamic", 40, "Shoulder blades glide."),
+        m("Ankle Dorsiflexion Rock", "dynamic", 40, "Knee over toes, heel down."),
+        m("Hamstring Hinge Isometric", "static", 20, "Light hold at end-range."),
+        m("Pecs Corner Stretch", "static", 20, "Open chest gently.")
+      ],
+      cycling: [
+        m("March + Knee Hugs", "dynamic", 45, "Bring knee to chest, alternate."),
+        m("Hip Circles", "dynamic", 45, "Oil the hips."),
+        m("T-Spine Reach", "dynamic", 40, "Reach and rotate."),
+        m("Leg Swings (front/back)", "dynamic", 45, "Hamstrings/hip flexors."),
+        m("Ankle Rolls", "dynamic", 30, "Prep for pedal stroke."),
+        m("Quad Rock Back", "dynamic", 40, "Kneeling, rock to feel quads."),
+        m("Calf Wall Stretch", "static", 20, "Post-dynamic cooldown hold."),
+        m("Hip Flexor Lunge", "static", 20, "Tall posture, glute squeeze.")
+      ],
+      soccer: [
+        m("Light Jog + Lateral Shuffle", "dynamic", 60, "Multi-directional."),
+        m("Inch Worm Walkouts", "dynamic", 45, "Core + hamstrings."),
+        m("Cossack Squats", "dynamic", 45, "Groin/adductors."),
+        m("Knee to Chest to Lunge", "dynamic", 45, "Balance + mobility."),
+        m("A-Skips / Bounds", "dynamic", 40, "Elastic prep."),
+        m("Quick Hip Turns", "dynamic", 30, "Field-specific agility."),
+        m("Adductor Rock-Back", "dynamic", 40, "Side lunge on floor."),
+        m("Groin (Butterfly) Hold", "static", 20, "Gentle end to sequence."),
+      ],
+      // Extra focus “add-ons”
+      focus: {
+        hips: [
+          m("90/90 Hip Rotations", "dynamic", 45, "Slow rotations."),
+          m("Hip Flexor Lunge Shift", "dynamic", 40, "Glute squeeze.")
+        ],
+        hamstrings: [
+          m("Hamstring Sweep", "dynamic", 40, "Sweep hands to foot."),
+          m("RDL Hinge Pulses", "dynamic", 35, "Tiny pulses near end range.")
+        ],
+        calves: [
+          m("Ankle Hops", "dynamic", 30, "Elastic contacts."),
+          m("Calf Wall Stretch", "static", 20, "Straight then bent knee.")
+        ],
+        shoulders: [
+          m("Shoulder Pass-Through", "dynamic", 45, "Towel or band."),
+          m("Wall Angels", "dynamic", 40, "Keep ribs down.")
+        ]
+      }
+    };
+
+    // Helper to define a move
+    function m(name, type, seconds, cue){
+      return { name, type, seconds, cue };
+    }
+
+    // State
+    let routine = [];
+    let index = 0;
+    let remaining = 0;
+    let timerId = null;
+    const els = {
+      list:      document.getElementById("list"),
+      progress:  document.getElementById("progressBar"),
+      clock:     document.getElementById("clock"),
+      nowLabel:  document.getElementById("nowLabel"),
+      activity:  document.getElementById("activity"),
+      intensity: document.getElementById("intensity"),
+      focus:     document.getElementById("focus"),
+      build:     document.getElementById("build"),
+      clear:     document.getElementById("clear"),
+      print:     document.getElementById("print"),
+      start:     document.getElementById("start"),
+      pause:     document.getElementById("pause"),
+      reset:     document.getElementById("reset"),
+      next:      document.getElementById("next"),
+      prev:      document.getElementById("prev"),
+      complete:  document.getElementById("complete")
+    };
+
+    // Intensity scaling (kept gentle)
+    const scaleByIntensity = {
+      easy: s => Math.max(15, Math.round(s * 0.8)),
+      moderate: s => s,
+      hard: s => Math.round(s * 1.2)
+    };
+
+    // Build a routine
+    els.build.addEventListener("click", () => {
+      const act = els.activity.value;
+      const intensity = els.intensity.value;
+      const focus = els.focus.value;
+
+      // Base sequence
+      const base = MOVES[act] ? [...MOVES[act]] : [...MOVES.general];
+
+      // Optional focus add-ons (insert after first 3 moves)
+      if (focus && MOVES.focus[focus]) {
+        base.splice(3, 0, ...MOVES.focus[focus]);
+      }
+
+      // Scale durations by intensity
+      routine = base.map(move => ({
+        ...move,
+        seconds: clamp(scaleByIntensity[intensity](move.seconds), 15, 90)
+      }));
+
+      index = 0;
+      remaining = routine.length ? routine[0].seconds : 0;
+      renderList();
+      updateProgress();
+      updateNow();
+      setClock(remaining);
+      stopTimer();
+      saveSession();
+      announce("Routine ready. Press Start to begin.");
+    });
+
+    els.clear.addEventListener("click", () => {
+      routine = [];
+      index = 0;
+      remaining = 0;
+      els.list.innerHTML = "";
+      setClock(0);
+      els.nowLabel.textContent = "No routine loaded";
+      updateProgress();
+      stopTimer();
+      localStorage.removeItem("smart-stretch-v1");
+    });
+
+    els.print.addEventListener("click", () => window.print());
+
+    // Timer controls
+    els.start.addEventListener("click", startTimer);
+    els.pause.addEventListener("click", stopTimer);
+    els.reset.addEventListener("click", () => {
+      if (!routine.length) return;
+      remaining = routine[index].seconds;
+      setClock(remaining);
+      stopTimer();
+    });
+    els.next.addEventListener("click", () => advance(1));
+    els.prev.addEventListener("click", () => advance(-1));
+    els.complete.addEventListener("click", completeCurrent);
+
+    // Core timer loop
+    function startTimer(){
+      if (!routine.length) return;
+      if (timerId) return; // already running
+      timerId = setInterval(tick, 1000);
+    }
+    function stopTimer(){
+      clearInterval(timerId);
+      timerId = null;
+    }
+    function tick(){
+      if (remaining > 0){
+        remaining--;
+        setClock(remaining);
+      } else {
+        // auto advance when a move finishes
+        completeCurrent(true);
+      }
+    }
+
+    function completeCurrent(auto=false){
+      if (!routine.length) return;
+      markItemComplete(index);
+      if (index < routine.length - 1){
+        index++;
+        remaining = routine[index].seconds;
+        updateNow();
+        setClock(remaining);
+        updateProgress();
+        saveSession();
+        if (auto) announce("Next: " + routine[index].name);
+      } else {
+        stopTimer();
+        remaining = 0;
+        setClock(0);
+        updateProgress();
+        els.nowLabel.textContent = "All done — nice work.";
+        announce("Routine complete");
+        localStorage.removeItem("smart-stretch-v1");
+      }
+    }
+
+    function advance(step){
+      if (!routine.length) return;
+      const next = clamp(index + step, 0, routine.length - 1);
+      index = next;
+      remaining = routine[index].seconds;
+      setClock(remaining);
+      updateNow();
+      updateProgress();
+      saveSession();
+    }
+
+    // Render list
+    function renderList(){
+      els.list.innerHTML = "";
+      routine.forEach((move, i) => {
+        const it = document.createElement("div");
+        it.className = "item";
+        it.innerHTML = `
+          <h3>
+            <span>${escapeHtml(move.name)}</span>
+            <span class="badge">${move.type === "dynamic" ? "Dynamic" : "Static"}</span>
+          </h3>
+          <div class="meta">
+            ${move.type === "static"
+              ? "Gentle hold · "
+              : "Controlled reps · "}
+            ~ ${move.seconds}s · ${escapeHtml(move.cue)}
+          </div>
+          <div class="row">
+            <button class="btn secondary" data-action="skip">Skip</button>
+            <button class="btn" data-action="jump">Start Here</button>
+          </div>
+        `;
+        it.querySelector('[data-action="skip"]').addEventListener("click", () => {
+          // Remove this move from routine
+          routine.splice(i,1);
+          if (i < index) index = Math.max(0, index - 1);
+          if (index >= routine.length){
+            index = Math.max(0, routine.length - 1);
+          }
+          remaining = routine.length ? routine[index].seconds : 0;
+          renderList();
+          updateNow();
+          updateProgress();
+          saveSession();
+        });
+        it.querySelector('[data-action="jump"]').addEventListener("click", () => {
+          index = i;
+          remaining = routine[index].seconds;
+          setClock(remaining);
+          updateNow();
+          updateProgress();
+          saveSession();
+          announce("Jumped to " + routine[index].name);
+        });
+        els.list.appendChild(it);
+      });
+    }
+
+    function markItemComplete(i){
+      const node = els.list.children[i];
+      if (!node) return;
+      node.style.opacity = .6;
+      node.style.filter = "grayscale(10%)";
+      const badge = node.querySelector(".badge");
+      if (badge) badge.textContent = "Done";
+      node.querySelectorAll("button").forEach(b => b.disabled = true);
+    }
+
+    // UI helpers
+    function updateNow(){
+      if (!routine.length){
+        els.nowLabel.textContent = "No routine loaded";
+        return;
+      }
+      const cur = routine[index];
+      els.nowLabel.textContent = `${cur.name} — ${cur.type === "dynamic" ? "dynamic" : "static"} (${cur.seconds}s)`;
+      // Visually mark previous as dimmed
+      [...els.list.children].forEach((node, i) => {
+        node.style.outline = i === index ? "2px solid var(--accent)" : "none";
+      });
+    }
+
+    function updateProgress(){
+      const total = routine.reduce((a,b)=>a+b.seconds, 0);
+      const done   = routine.slice(0, index).reduce((a,b)=>a+b.seconds, 0) + (routine[index] ? (routine[index].seconds - remaining) : 0);
+      const pct = total ? Math.min(100, Math.round(done / total * 100)) : 0;
+      els.progress.style.width = pct + "%";
+    }
+
+    function setClock(sec){
+      const mm = String(Math.floor(sec/60)).padStart(2,"0");
+      const ss = String(Math.floor(sec%60)).padStart(2,"0");
+      els.clock.textContent = `${mm}:${ss}`;
+    }
+
+    // Storage
+    function saveSession(){
+      const payload = { routine, index, remaining };
+      localStorage.setItem("smart-stretch-v1", JSON.stringify(payload));
+    }
+    function loadSession(){
+      const raw = localStorage.getItem("smart-stretch-v1");
+      if (!raw) return;
+      try{
+        const { routine: r, index: i, remaining: rem } = JSON.parse(raw);
+        if (Array.isArray(r) && r.length){
+          routine = r; index = clamp(i,0,r.length-1); remaining = rem || r[index].seconds;
+          renderList(); updateNow(); setClock(remaining); updateProgress();
+        }
+      } catch {}
+    }
+
+    // Utilities
+    function clamp(n, min, max){ return Math.max(min, Math.min(max, n)); }
+    function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    // Simple live region announcements
+    const live = document.createElement("div");
+    live.setAttribute("aria-live","polite");
+    live.setAttribute("role","status");
+    live.style.position="absolute"; live.style.left="-9999px";
+    document.body.appendChild(live);
+    function announce(text){ live.textContent = text; }
+
+    // Boot
+    loadSession();
+  </script>
+</body>
+</html>
